@@ -16,13 +16,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Brightness get platformBrightness =>
-      MediaQueryData.fromWindow(WidgetsBinding.instance.window)
+      MediaQueryData.fromWindow(WidgetsBinding.instance!.window)
           .platformBrightness;
 
   void _setSystemUIOverlayStyle() {
@@ -70,14 +70,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  EpubController _epubReaderController;
+  late EpubController _epubReaderController;
 
   @override
   void initState() {
