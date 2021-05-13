@@ -381,7 +381,7 @@ class _EpubViewState extends State<EpubView> {
               );
             }
           },
-        ),
+        )..toString(),
       ],
     );
   }
