@@ -383,7 +383,7 @@ class _EpubViewState extends State<EpubView> {
             _getParagraphIndexBy(positionIndex: index) == 0)
           _buildDivider(_chapters[chapterIndex]),
         SelectableText(
-          html.toString(),
+          html.data,
           toolbarOptions: ToolbarOptions(
             copy: true,
           ),
