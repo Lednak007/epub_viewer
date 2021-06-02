@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:epub_view/src/higlight_text/select_highlight.dart';
+import 'package:epub_view/src/myMaterialSelectionControls.dart';
 import 'package:epubx/epubx.dart' hide Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ import 'package:rxdart/rxdart.dart';
 import 'epub_cfi/generator.dart';
 import 'epub_cfi/interpreter.dart';
 import 'epub_cfi/parser.dart';
+import 'higlight_text/selected_pattern.dart';
 
 export 'package:epubx/epubx.dart' hide Image;
 
@@ -349,6 +352,25 @@ class _EpubViewState extends State<EpubView> {
         ),
       );
 
+  String highlighText = '';
+  String beforeText = '';
+  String lastText = '';
+
+  List<SelectedPattern> selectedPatternList = [];
+
+  TextStyle underlineText(
+    TextDecoration textDecoration,
+  ) =>
+      TextStyle(
+        fontSize: 19.5,
+        fontFamily: 'Cardo',
+        decorationColor: Colors.redAccent,
+        decorationThickness: 3,
+        decoration: TextDecoration.underline,
+      );
+  TextStyle highLightText(Color color) =>
+      TextStyle(fontSize: 19.5, fontFamily: 'Cardo', backgroundColor: color);
+
   Widget _defaultItemBuilder(int index) {
     if (_paragraphs.isEmpty) {
       return Container();
@@ -371,6 +393,77 @@ class _EpubViewState extends State<EpubView> {
             ).merge(Style.fromTextStyle(widget.textStyle)),
           },
           customRender: {
+            'p': (context, child, attributes, node) {
+              if (!node!.innerHtml.contains('img'))
+                return GestureDetector(
+                  onTap: () {
+                    var a = widget.controller.epubCfi;
+                    print(a);
+                  },
+                  child: Stack(
+                    children: [
+                      SelectedHighlightText(
+                        node.text,
+                        textSelectionControls: MyMaterialTextSelectionControls(
+                            onTapHighlight: (y, x) {
+                          final TextEditingValue _value = x.textEditingValue;
+
+                          highlighText =
+                              _value.selection.textInside(_value.text);
+                          if (highlighText == "") {
+                          } else {
+                            setState(() {
+                              beforeText =
+                                  _value.text.split("$highlighText").first;
+                              lastText =
+                                  _value.text.split("$highlighText").last;
+                              // print(beforeText);
+                              // print(lastText);
+                              selectedPatternList.add(SelectedPattern(
+                                  matchWordBoundaries: false,
+                                  superScript: true,
+                                  // stringBeforeTarget: beforeText,
+                                  // stringAfterTarget: lastText,
+                                  // // subScript: true,
+                                  targetString: highlighText,
+                                  hasSpecialCharacters: true,
+                                  style: highLightText(y.withOpacity(0.5))));
+                            });
+                          }
+
+                          x.hideToolbar();
+                        }, onTapUnderline: (x) {
+                          final TextEditingValue _value = x.textEditingValue;
+
+                          highlighText =
+                              _value.selection.textInside(_value.text);
+                          setState(() {
+                            selectedPatternList.add(SelectedPattern(
+                                matchWordBoundaries: false,
+                                superScript: true,
+                                // subScript: true,
+                                hasSpecialCharacters: true,
+                                targetString: highlighText,
+                                style: underlineText(
+                                  TextDecoration.underline,
+                                )));
+                          });
+                          x.hideToolbar();
+                        }),
+                        selectable: true,
+                        defaultStyle: TextStyle(
+                          fontSize: 19.5,
+                          fontFamily: 'Cardo',
+                          color: Color(0xFF2B2B2B),
+                        ),
+                        strutStyle:
+                            StrutStyle(forceStrutHeight: true, height: 1.35),
+                        patternList: selectedPatternList,
+                      ),
+                    ],
+                  ),
+                );
+            },
             'img': (context, child, attributes, node) {
               final url = attributes['src']!.replaceAll('../', '');
               return Image(
